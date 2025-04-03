@@ -15,7 +15,8 @@
     "commands": [
       {
         "command": "pretty-command-line.terminal",
-        "title": "Run Command Line"
+        "title": "Run Command Line",
+        "icon": "src/terminal.png"
       },
       {
         "command": "pretty-command-line.searchData",
