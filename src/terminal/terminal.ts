@@ -1,10 +1,13 @@
 import { getTerminalWebviewContent } from './terminalWebView';
 import * as vscode from 'vscode';
-import { execSync } from 'child_process';
+import { ChildProcess, execSync } from 'child_process';
 import * as path from 'path';
+import os from 'os'
+import child_process from 'node:child_process'
 
 export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context: vscode.ExtensionContext) => {
 
+        
         const columnToShowIn = vscode.window.activeTextEditor ? vscode.window.activeTextEditor?.viewColumn : undefined;
         if(currentPanel)
         {
@@ -28,15 +31,30 @@ export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context:
         currentPanel.iconPath = icon;
         
         const iconUri = currentPanel.webview.asWebviewUri(icon);
-        
+
+        let userPath: String;
+        if (os.platform() === "win32") 
+        {
+            const path = execSync('echo %cd%').toString().trim();
+            console.log(path)
+            userPath = `${path}>` 
+        }
+        else if (os.platform() === "linux")
+        {
+            const path = execSync('pwd').toString().trim()
+            userPath = `user@linux: ${path}`
+        }
+
         const updateWebview = () => {
             
             if(currentPanel)
             {
                 const fontColor = 'white';
-                currentPanel.webview.html = getTerminalWebviewContent(iconUri.toString(), fontColor);
+                currentPanel.webview.html = getTerminalWebviewContent(userPath, iconUri.toString(), fontColor);
             }
         };
+
+        
         currentPanel.webview.onDidReceiveMessage(
             message => {
                 switch (message.command) {

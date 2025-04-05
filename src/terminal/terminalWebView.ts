@@ -4,14 +4,13 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { execSync } from 'child_process';
 
-export function getTerminalWebviewContent(icon: string, fontColor: string)
+export function getTerminalWebviewContent(commandLinePath: String, icon: string, fontColor: string)
 { 
  	return `<!DOCTYPE html>
  <html lang="en">
  <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Linux Terminal</title>
      <style>
  		@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
          body {
@@ -97,7 +96,7 @@ export function getTerminalWebviewContent(icon: string, fontColor: string)
  						currentDir = message.newDirectory;
              			const p = terminal.querySelectorAll(".prompt")
  						p.forEach((item) => {
- 							item.innerHTML =  "user@linux: " + currentDir + "<br/>╰┈➤" ;
+ 							item.innerHTML =  "${commandLinePath} " + currentDir + "<br/>╰┈➤" ;
  						})
  					}
  				}
@@ -113,7 +112,7 @@ export function getTerminalWebviewContent(icon: string, fontColor: string)
              {
                 const newLine = document.createElement("p");
                 const notSupportedMessage = document.createElement("p");
-                newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>user@linux: ~<br/>╰┈➤</span>" + command + "</p>";              
+                newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath} ~<br/>╰┈➤</span>" + command + "</p>";              
                 notSupportedMessage.innerHTML =  "<p style='color: red'>" + "This text editor is not supported yet" + "</p>";              
                 terminal.appendChild(newLine);  
                 terminal.appendChild(notSupportedMessage);  
@@ -127,12 +126,12 @@ export function getTerminalWebviewContent(icon: string, fontColor: string)
                      text: command
                  });
                  const newLine = document.createElement("p");
-                 newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>user@linux: ~<br/>╰┈➤</span>" + command + "</p>";              
+                 newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath} ~<br/>╰┈➤</span>" + command + "</p>";              
                  terminal.appendChild(newLine);  
                  terminal.appendChild(terminalInput); 
                  terminalInput.querySelector("#terminal-input").focus()
                  input.value = "";
-                 if(command === "clear")
+                 if(command === "clear" || command === "cls")
                  {
                     terminal.textContent = "";
                     terminal.appendChild(terminalInput);
@@ -149,7 +148,7 @@ export function getTerminalWebviewContent(icon: string, fontColor: string)
         </h1>
          <form onsubmit="return false;">
              <div id="terminal-input-container">
-                 <span class="prompt" >user@linux: ~<br/>╰┈➤</span> 
+                 <span class="prompt" >${commandLinePath} ~<br/>╰┈➤</span> 
                  <input type="text" id="terminal-input" placeholder="Type a command..." 
                          autofocus onkeypress="handleEnter(event)">
              </div>
