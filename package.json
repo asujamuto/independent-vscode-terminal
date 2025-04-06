@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "pretty-command-line.terminal",
-        "title": "PrettyCommandLine: Run Command Line",
+        "title": "Pretty Command Line: Run Command Line",
         "icon": "src/terminal.png"
       }
       ]
