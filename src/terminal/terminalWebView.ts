@@ -63,6 +63,7 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
  <body>
  <script>
      const vscode = acquireVsCodeApi(); 
+     let currentSystemPath;
      document.addEventListener("DOMContentLoaded", function () {
           const terminalInput = document.querySelector("#terminal-input-container");
           terminalInput.querySelector("#terminal-input").focus()
@@ -73,14 +74,15 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
              const message = event.data; 
              const terminal = document.querySelector(".terminal");
              const terminalInput = document.querySelector("#terminal-input-container");
- 			let currentDir;
+ 			 let currentDir;
              switch (message.command) {
                  case 'output-data':
 			
  					let outputParsed = JSON.parse(message.output);
  					let outputContainer = document.createElement("div");
  					outputContainer.className = "output-container";
-			
+                    
+                    let pTextValues = [] 
 		
  					outputParsed.forEach(i => {
                  		let outputParagraph = document.createElement("p");
@@ -93,11 +95,12 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
  					terminalInput.querySelector("#terminal-input").focus();
  					if (message.newDirectory) 
  					{
- 						currentDir = message.newDirectory;
+                        currentSystemPath = message.newDirectory;
              			const p = terminal.querySelectorAll(".prompt")
  						p.forEach((item) => {
- 							item.innerHTML =  "${commandLinePath} " + currentDir + "<br/>╰┈➤" ;
+ 							item.innerHTML =  outputParsed + "<br/>╰┈➤" ;
  						})
+                        p[p.length - 1].innerHTML = outputParsed + "<br/>╰┈➤" ;
  					}
  				}
      });
@@ -112,7 +115,7 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
              {
                 const newLine = document.createElement("p");
                 const notSupportedMessage = document.createElement("p");
-                newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath} ~<br/>╰┈➤</span>" + command + "</p>";              
+                newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath}<br/>╰┈➤</span>" + command + "</p>";              
                 notSupportedMessage.innerHTML =  "<p style='color: red'>" + "This text editor is not supported yet" + "</p>";              
                 terminal.appendChild(newLine);  
                 terminal.appendChild(notSupportedMessage);  
@@ -126,7 +129,7 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
                      text: command
                  });
                  const newLine = document.createElement("p");
-                 newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath} ~<br/>╰┈➤</span>" + command + "</p>";              
+                 newLine.innerHTML = "<p style='color: ${fontColor}'><span class='prompt'>${commandLinePath}<br/>╰┈➤</span>" + command + "</p>";              
                  terminal.appendChild(newLine);  
                  terminal.appendChild(terminalInput); 
                  terminalInput.querySelector("#terminal-input").focus()
@@ -148,7 +151,7 @@ export function getTerminalWebviewContent(commandLinePath: String, icon: string,
         </h1>
          <form onsubmit="return false;">
              <div id="terminal-input-container">
-                 <span class="prompt" >${commandLinePath} ~<br/>╰┈➤</span> 
+                 <span class="prompt" >${commandLinePath}<br/>╰┈➤</span> 
                  <input type="text" id="terminal-input" placeholder="Type a command..." 
                          autofocus onkeypress="handleEnter(event)">
              </div>

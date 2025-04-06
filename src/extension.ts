@@ -1,8 +1,4 @@
 import * as vscode from 'vscode';
-import { execSync } from 'child_process';
-import { getTerminalWebviewContent } from './terminal/terminalWebView';
-import * as fs from 'fs';
-import * as path from 'path';
 import { terminal } from './terminal/terminal';
 
 
@@ -13,7 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let currentPanel: vscode.WebviewPanel | undefined = undefined;	
 	
 	
-	const terminalDisposable = vscode.commands.registerCommand('pretty-command-line.terminal', () => terminal(currentPanel, context));
+	const terminalDisposable = vscode.commands.registerCommand('pretty-command-line.terminal',
+								() => terminal(currentPanel, context));
 
 	context.subscriptions.push(terminalDisposable);
 }

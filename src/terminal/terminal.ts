@@ -1,29 +1,25 @@
 import { getTerminalWebviewContent } from './terminalWebView';
 import * as vscode from 'vscode';
-import { ChildProcess, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import * as path from 'path';
-import os from 'os'
-import child_process from 'node:child_process'
+import os from 'os';
 
 export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context: vscode.ExtensionContext) => {
 
         
-        const columnToShowIn = vscode.window.activeTextEditor ? vscode.window.activeTextEditor?.viewColumn : undefined;
+        const columnToShowIn = vscode.window.activeTextEditor?.viewColumn;
         if(currentPanel)
         {
                 currentPanel.reveal(columnToShowIn);
         } 
-        else 
-        {
-            currentPanel = vscode.window.createWebviewPanel(
+        currentPanel = vscode.window.createWebviewPanel(
             'pretty-command-line',
             'Pretty Terminal',
              columnToShowIn || vscode.ViewColumn.One,
              {
-                enableScripts: true
-             },
-             );
-        }
+                enableScripts: true,
+                retainContextWhenHidden: true
+             });
         
         let icon = vscode.Uri.file(
             path.join(context.extensionPath, 'src/icons/terminal_icon.png')
@@ -33,16 +29,17 @@ export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context:
         const iconUri = currentPanel.webview.asWebviewUri(icon);
 
         let userPath: String;
+
         if (os.platform() === "win32") 
         {
-            const path = execSync('echo %cd%').toString().trim();
-            console.log(path)
-            userPath = `${path}>` 
+            let path = execSync('echo %cd%').toString().trim();
+            console.log(path);
+            userPath = `${path}>`;
         }
         else if (os.platform() === "linux")
         {
-            const path = execSync('pwd').toString().trim()
-            userPath = `user@linux: ${path}`
+            let path = execSync('pwd').toString().trim();
+            userPath = `user@linux: ${path}`;
         }
 
         const updateWebview = () => {
@@ -61,30 +58,46 @@ export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context:
                     case 'terminal-command':
                         try {
                         
-                        if(message.text === "clear")
+                        if(message.text === "clear" || message.text === "clear ")
                         {
                             return;	
                         }
                         if (message.text.startsWith('cd ')) {
                             const newPath = message.text.slice(3).trim();
                             process.chdir(newPath);  
+                            
+                            let currentTerminalPath: String;
+                            switch (os.platform()) {
+                                case "win32":
+                                    currentTerminalPath = process.cwd() + ">";
+                                    break;
+                                case "linux":
+                                    currentTerminalPath = "user@linux: " + process.cwd();
+                                    break;
+                                default:
+                                    currentTerminalPath = process.cwd() + ">";
+                                    break;
+                            }
+
+
                             return currentPanel?.webview.postMessage({
                                 command: 'output-data',
                                 newDirectory: process.cwd(),
-                                output: JSON.stringify([`${process.cwd()}`])
+                                output: JSON.stringify([`${currentTerminalPath}`])
                             });
                         }
+                        else
+                        {
+                            const output = execSync(message.text, {encoding: 'utf-8'});
+                            const splitted = output.split("\n").filter(line => line !== '');
+                            
+                            currentPanel?.webview.postMessage({ 
+                                command: 'output-data',
+                                output: JSON.stringify(splitted)  
+                            });    
+                        }
 
-                        const output = execSync(message.text, {encoding: 'utf-8'});
-                        const splitted = output.split("\n").filter(line => line !== '');
                         
-                        currentPanel?.webview.postMessage({ 
-                            command: 'output-data',
-                            output: JSON.stringify(splitted)  
-                        });
-                        
-                        
-                            return;
                         }
                         catch(e: unknown)
                         {
@@ -104,10 +117,10 @@ export const terminal = (currentPanel: vscode.WebviewPanel | undefined, context:
 
         updateWebview();
 
-        const interval = setInterval(updateWebview, 1000);
+        // const interval = setInterval(updateWebview, 1000);
 
-       currentPanel.onDidDispose(() => { currentPanel = undefined; clearInterval(interval); },
+        currentPanel.onDidDispose(() => { currentPanel = undefined },
                     null, 
                     context.subscriptions
         ); 
-    };
+};

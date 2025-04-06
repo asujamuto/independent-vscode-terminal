@@ -15,19 +15,10 @@
     "commands": [
       {
         "command": "pretty-command-line.terminal",
-        "title": "Run Command Line",
+        "title": "PrettyCommandLine: Run Command Line",
         "icon": "src/terminal.png"
-      },
-      {
-        "command": "pretty-command-line.searchData",
-        "title": "Hi There!"
-      },
-      {
-        "command": "pretty-command-line.start",
-        "title": "Start new coding cat",
-        "category": "Cat Coding"
       }
-    ]
+      ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
