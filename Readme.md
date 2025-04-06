@@ -14,6 +14,8 @@ git clone https://github.com/asujamuto/independent-vscode-terminal.git
 cd independent-vscode-terminal
 
 npm install
+
+code -r .
 ```
 
 2. Run the extension:
